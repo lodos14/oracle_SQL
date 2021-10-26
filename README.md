@@ -189,3 +189,12 @@ SELECT * FROM MEMBER -> 테이블의 모든 컬럼 불러오기
     UPDATE MEMBER SET PWD = '333', name='손오공' WHERE ID = 'dragon'; 
     // 삭제하는 경우도 마찬가지로 WHERE를 하지 않으면 전부 삭제됨 주의
     DELETE MEMBER WHERE ID = 'test'; -- 삭제하는 경우
+
+## 8. 트랜잭션
+web_JDBC readme 참고
+
+![image](https://user-images.githubusercontent.com/81665608/138891461-052f682e-cf8b-42c0-a1bd-e66e1cd2a3dd.png)
+
+처음 데이터베이스를 만들 때 세부 스탯 중 영구 와 임시가 있었는데 COMMIT 전에는 임시저장소에서 테스트 되고 COMMIT을 해야 다른 세션에도 반영이 된다. 뒤로 돌아가는 ROLLBACK 도 마찬가지다. <br>
+
+어떤 세션에서 임시로 무언가를 작업중이면 COMMIT 또는 ROLLBACK를 하기 전까지 ROCK이 걸려서 다른 세션에서 작업을 할 수 없다.
