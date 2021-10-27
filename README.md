@@ -246,7 +246,7 @@ web_JDBC readme 참고
     {} : 자리수를 뜻함 {4}는 4자리 {3,4}는 3자리 또는 4자리
     \d{3, 4} : 0에서 9까지의 숫자가 들어간 3자리 또는 4자리
     
-    전화번호를 정규식으로 나타내면 다음과 같이 쓸 수 있다.
+    전화번호는 다음과 같이 정규식으로 나타낼 수 있다.
     
     01[016-9]-\d{3,4}-\d{4}
 
@@ -255,5 +255,190 @@ web_JDBC readme 참고
 
 ![image](https://user-images.githubusercontent.com/81665608/139033972-bad4695e-a211-4cf0-807a-ee22777f0603.png)
 
-자신이 만든 정규식 테스트 하는 사이트 https://regexlib.com/RETester.aspx
+#### 자신이 만든 정규식 테스트 하는 사이트 https://regexlib.com/RETester.aspx
 
+#### 문자열을 비교하기 위한 정규식
+
+    // ex) 이메일
+
+    \w : 영대소문자, 숫자 [a-zA-Z_0-9] 와 같다 _ 포함
+    \D : \d의 부정으로 숫자가 올 수 없다. [^0-9] 와 같은 의미
+    | : OR의 의미
+    + : 1개 이상
+
+    이메일은 다음과 같이 정규식으로 나타낼 수 있다.
+
+    \D\w+@\D\w+.(org|net|com)
+
+더 많은 식은 찾아볼것<br>
+https://regexlib.com/Search.aspx 에서 원하는 정규식을 찾아도 됨
+
+## 10. 행 제한
+
+### 10.1 Rownum 
+
+ROWNUM은 결과 집합이 만들어질 때 붙는 행의 번호이다.<br>
+
+아래 사진과 같이 ROWNUM >= 1 을 사용할 경우 결과 집합이 만들어 지면서 1부터 ROWNUM가 붙기 때문에 상관없지만 <br>
+
+ROWNUM >= 3 를 하면 아무것도 나오지 않는다. <br>
+
+그 이유는 결과 집합이 만들어질 때 ROWNUM 1부터 채워지기 때문에 3이상이라는 조건에 만족하지 않아 전부 빼버리게 된다. 
+
+![image](https://user-images.githubusercontent.com/81665608/139040206-6e295c0f-d794-4775-b1d1-5013ee106122.png)
+
+그래서 ROWNUM을 이용해서 행을 제한하려면 ROWNUM 컬럼을 만들어주고 사용해야 한다. <br>
+    
+    SELECT ROWNUM FROM NOTICE  
+    // ROWNUM의 컬럼을 생성하고 1부터 순서대로 값이 생성된다.
+    
+위 코드를 이용하면
+
+    SELECT ROWNUM, NOTICE.* FROM NOTICE
+    // ROWNUM 과 NOTICE안의 모든 컬럼을 불러온다. NOTICE.* 와 * 는 차이가 있다. (SELECT NOTICE.ID FROM NOTICE)
+    
+이 결과 집합을 테이블로 삼아 아래와 같이 작성이 가능하지만
+
+    SELECT * FROM (SELECT ROWNUM, NOTICE.* FROM NOTICE ) WHERE ROWNUM >= 3
+    // 아무것도 출력이 안된다. 이유는 WHERE ROWNUM은 새로운 SELECT의 ROWNUM이기 때문에
+    
+WHERE 뒤에 ROWNUM은 새로운 SELECT의 ROWNUM 이므로 FROM의 ROWNUM에 별칭을 붙여 아래와 같이 작성하면 ROWNUM으로 행을 제한할 수 있다.
+
+    SELECT * FROM (SELECT ROWNUM as NUM, NOTICE.* FROM NOTICE ) WHERE NUM >= 3
+    
+
+
+ ### 10.2 중복된 값 제거 (DISTINCT)
+ 
+ 컬럼 앞에 DISTINCT를 붙여주면 그 컬럼의 중복 값을 제거해준다. <br>
+ 단 다른 컬럼과 같이 동시에 사용하지 못한다. 하나의 컬럼 목록만 뽑아줄 때만 사용가능
+ 
+    SELECT DISTINCT AGE FROM MEMBER;
+    
+    
+ ## 11. 내장함수
+ 
+ ### 11.1 문자열 함수
+ 
+ 연산자로 처리 가능하면 함수보다는 연산자로 처리하는게 좋다.
+ 
+ #### SUBSTR 문자열 - 추출 함수
+ 
+    SELECT SUBSTR('HELLO', 3) FROM DUAL; // 세 번째부터 모든 문자 출력
+    // LLO
+    SELECT SUBSTR('HELLO', 2, 3) FROM DUAL; // 두 번째부터 3개의 문자 출력
+    // ELL
+    
+    예제) 전화번호를 등록하지 않은 사람의 생일이 7, 8, 9월인 사람의 모든 정보를 출력해라.
+    SELECT * FROM MEMBER WHERE PHONE IS NULL AND SUBSTR(BIRTHDAY, 6,2) IN (07,08,09); 
+    
+ #### CONCAT - 문자열 덧셈 함수
+    
+    SELECT CONCAT('홍', '길동') FROM DUAL;  // 가능하면 || 사용
+    // 홍길동
+    
+ #### TRIM - 문자열 트림 함수(공백제거)
+ 
+    SELECT LTRIM('    HELLO     ') FROM DUAL; // 왼쪽 공백 제거
+    SELECT RTRIM('    HELLO     ') FROM DUAL;  // 오른쪽 공백 제거
+    SELECT TRIM('    HELLO     ') FROM DUAL;  // 양쪽 공백 제거
+  
+ 
+ #### LOWER, UPPER - 문자열 소문자 또는 대문자로 변경하기
+ 
+    SELECT LOWER('NeWlEC') FROM DUAL; // 소문자로 변경
+    // newlec
+    SELECT UPPER('NeWlEC') FROM DUAL; // 대문자로 변경
+    // NEWLEC
+    
+    EX) 대소문자를 가리지 않고 출력할 때 사용 LOWER이나 UPPER를 사용해서 통일해주고 출력
+    
+#### REPLACE, TRANSLATE - 문자열 대치 함수
+ 
+    SELECT REPLACE('WHEWE WE ARE', 'WE', 'YOU') FROM DUAL; // 문자열 WE를 YOU로 통채로 교체
+    // WHEYOU YOU ARE
+    SELECT TRANSLATE('WHEWE WE ARE', 'WE', 'YOU') FROM DUAL; // W를 Y로 E를 O로 변경 자리수 안맞는건 무시됨
+    // YHOYO YO ARO
+    
+#### LPAD, RPAD - 문자열 패딩 함수 
+
+    SELECT LPAD('HELLO', 7, 'A') FROM DUAL; -- 부족한 자리만큼 A로 왼쪽으로 채움 이 때 출력 값은 7자리 넘어가는건 무시됨
+    // AAHELLO
+    SELECT RPAD('HELLO', 7, 'A') FROM DUAL; -- 부족한 자리만큼 A로 오른쪽을 채움
+    // HELLOAA
+    SELECT RPAD('홍길', 6, '0') FROM DUAL; -- 한글은 자리 하나당 곱하기 2해줘야함
+    // 홍길00    
+
+#### INITCAP - 첫 글자를 대문자로 바꾸는 함수
+
+    SELECT INITCAP('the ...') FROM DUAL; -- 단어의 첫 글자를 대문자로 바꿔줌
+    // The ...
+    SELECT INITCAP('the most important thing is ....') FROM DUAL; -- 모든 단어 첫 글자를 대문자로 바꿈
+    // The Most Important Thing Is ....
+    
+#### INSTR - 문자열 위치 검색 함수
+    SELECT INSTR('ALL WE NEED TO IS JIST TO...', 'TO') FROM DUAL; -- TO의 위치를 알려줌
+    // 13
+    SELECT INSTR('ALL WE NEED TO IS JIST TO...', 'TO', 15) FROM DUAL; -- 15자리 다음부터 TO의 위치를 알려줌
+    // 24
+    SELECT INSTR('ALL WE NEED TO IS JIST TO...', 'TO', 1, 2) FROM DUAL; -- 첫 번째 TO위치부터 찾기 시작해서 두 번째 TO위치를 알려줌
+    // 24
+ 
+ #### LENGTH - 문자열 길이를 알려주는 함수
+ 
+    SELECT LENGTH('WHERE WE ARE') FROM DUAL; -- 문자열의 길이를 알려줌
+    // 12
+
+    EX) 만약에 회원의 전화번호를 컬럼에 포함된 문자 '-'를 없앤 전화번호의 길이를 출력하시오.
+    SELECT LENGTH(REPLACE(PHONE, '-', '')) FROM MEMBER; // 함수 중첩 가능
+
+#### ASCII, CHR - 아스키 관련 함수
+    SELECT ASCII('A') FROM DUAL; -- 코드 값을 반환하는 함수
+    // 65
+    SELECT CHR(65) FROM DUAL; -- 코드 값으로 문자를 반환하는 함수
+    // A
+    
+    
+### 11.2 숫자 함수
+
+#### ABS -  절대값을 구하는 함수 
+
+    SELECT ABS(35), ABS(-35) FROM DUAL;
+    // 35 35
+
+#### 음수/양수를 알려주는 함수 SIGN
+
+    SELECT SIGN(35), SIGN(-35), SIGN(0) FROM DUAL;
+    // 1  -1  0
+
+#### 숫자의 반올림 값을 알려주는 함수 ROUND
+
+    SELECT ROUND(34.35678), ROUND(34.56567) FROM DUAL;
+    // 34 35
+
+    SELECT ROUND(12.3456789, 2), ROUND(12.566789, 3) FROM DUAL; -- 반올림해서 소수 N 번째 자리까지 출력
+    // 12.35  12.567
+
+#### 숫자의 몫 나머지 값을 반환하는 함수 MOD
+
+    SELECT TRUNC(17/5) 몫, MOD(17, 5) 나머지 FROM DUAL;
+    // 3  2
+
+#### 숫자의 제곱을 구하는 함수와 제곱근을 구하는 함수
+
+    SELECT POWER(5, 3), SQRT(25) FROM DUAL;
+    // 125  5
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
