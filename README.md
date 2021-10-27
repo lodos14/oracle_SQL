@@ -406,12 +406,12 @@ WHERE 뒤에 ROWNUM은 새로운 SELECT의 ROWNUM 이므로 FROM의 ROWNUM에 �
     SELECT ABS(35), ABS(-35) FROM DUAL;
     // 35 35
 
-#### 음수/양수를 알려주는 함수 SIGN
+#### SIGN - 음수/양수를 알려주는 함수 
 
     SELECT SIGN(35), SIGN(-35), SIGN(0) FROM DUAL;
     // 1  -1  0
 
-#### 숫자의 반올림 값을 알려주는 함수 ROUND
+#### ROUND - 숫자의 반올림 값을 알려주는 함수 
 
     SELECT ROUND(34.35678), ROUND(34.56567) FROM DUAL;
     // 34 35
@@ -419,12 +419,12 @@ WHERE 뒤에 ROWNUM은 새로운 SELECT의 ROWNUM 이므로 FROM의 ROWNUM에 �
     SELECT ROUND(12.3456789, 2), ROUND(12.566789, 3) FROM DUAL; -- 반올림해서 소수 N 번째 자리까지 출력
     // 12.35  12.567
 
-#### 숫자의 몫 나머지 값을 반환하는 함수 MOD
+#### TRUNC, MOD - 숫자의 몫 나머지 값을 반환하는 함수 
 
     SELECT TRUNC(17/5) 몫, MOD(17, 5) 나머지 FROM DUAL;
     // 3  2
 
-#### 숫자의 제곱을 구하는 함수와 제곱근을 구하는 함수
+#### POWER, SQRT - 숫자의 제곱을 구하는 함수와 제곱근을 구하는 함수
 
     SELECT POWER(5, 3), SQRT(25) FROM DUAL;
     // 125  5
