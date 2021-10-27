@@ -198,3 +198,62 @@ web_JDBC readme 참고
 처음 데이터베이스를 만들 때 세부 스탯 중 영구 와 임시가 있었는데 COMMIT 전에는 임시저장소에서 테스트 되고 COMMIT을 해야 다른 세션에도 반영이 된다. 뒤로 돌아가는 ROLLBACK 도 마찬가지다. <br>
 
 어떤 세션에서 임시로 무언가를 작업중이면 COMMIT 또는 ROLLBACK를 하기 전까지 ROCK이 걸려서 다른 세션에서 작업을 할 수 없다.
+
+## 9. 연산자사용
+
+### 9.1 산술연산자
+
+1. 문자열의 더하기는 ||를 사용한다.
+2. 기본적인 산술연산자는 숫자에서만 사용 가능하다.
+
+        select hit+1 from notice; HIT 값에 1이 더한 값이 출력되지만 컬럼명이 HIT + 1 로 출력되므로 별칭을 사용해야 한다.
+        select 1+'3' from dual; -- 더미 테이블을 통해 단순 연산 결과 출력 가능 마찬가지로 별칭 사용해야 한다. 
+        // 출력결과 : 4         -- 문자열의 타입이 자동으로 숫자로 바뀜
+        select 1||'3' from dual; -- 문자열의 더하기는 ||를 사용한다 +는 숫자만 가능
+        // 출력결과 : 13
+        select name||'('||id||')' "user" from member;
+        // 출력결과 : 손오공(dragon)
+
+### 9.2 비교연산자
+
+![image](https://user-images.githubusercontent.com/81665608/139009301-cdaa7903-d813-40f1-9a74-47a542e3dd94.png)
+
+### 9.3 관계연산자
+
+![image](https://user-images.githubusercontent.com/81665608/139011083-1f295d75-6e1c-42a5-a305-c582dd0e25a5.png)
+
+![image](https://user-images.githubusercontent.com/81665608/139011421-6c0b609a-2713-4ed5-821f-5c745e966e2e.png)
+
+### 9.4 패턴 연산자
+
+1. 패턴 연산자를 사용할 경우 = 대신에 LIKE를 사용한다.
+2. %는 무엇이 와도 상관 없다는 뜻
+3. _ 는 자리를 뜻한다. 
+
+![image](https://user-images.githubusercontent.com/81665608/139024939-2c2197df-8d86-428d-8fa5-d8f6bcb3db2d.png)
+
+![image](https://user-images.githubusercontent.com/81665608/139027048-8b20164e-baef-4425-935b-0a6a3a72b0b4.png)
+
+### 9.5 정규식을 이용한 패턴비교
+
+#### 숫자를 정교하게 검색하는 예시
+
+    // ex) 전화번호
+    
+    [] : 하나의 자리를 뜻함
+    [016-9] : 0, 1, 6, 7, 8, 9 중 하나가 들어간다.
+    \d : [0-9] 와 같은 의미
+    {} : 자리수를 뜻함 {4}는 4자리 {3,4}는 3자리 또는 4자리
+    \d{3, 4} : 0에서 9까지의 숫자가 들어간 3자리 또는 4자리
+    
+    전화번호를 정규식으로 나타내면 다음과 같이 쓸 수 있다.
+    
+    01[016-9]-\d{3,4}-\d{4}
+
+
+정규식을 사용할 경우 REGEXP_LIKE 함수를 사용해야한다.
+
+![image](https://user-images.githubusercontent.com/81665608/139033972-bad4695e-a211-4cf0-807a-ee22777f0603.png)
+
+자신이 만든 정규식 테스트 하는 사이트 https://regexlib.com/RETester.aspx
+
