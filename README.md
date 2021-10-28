@@ -428,12 +428,101 @@ WHERE 뒤에 ROWNUM은 새로운 SELECT의 ROWNUM 이므로 FROM의 ROWNUM에 �
 
     SELECT POWER(5, 3), SQRT(25) FROM DUAL;
     // 125  5
+
+### 11.3 날짜 함수
+
+#### SYSDATE, CURRENT_DATE, SYSTIMESTAMP, CURRENT_TIMESTAMP - 현재 시간을 얻는 함수
+
+오라클 서버의 시간 : SYS,  세션 설정에 따른 시간 : CURRENT;
+년 월 일 : DATE, 시 분 초까지 : TITMESTAMP;
+
+    SELECT SYSDATE, CURRENT_DATE, SYSTIMESTAMP, CURRENT_TIMESTAMP FROM DUAL;
+
+
+#### 세션 시간과 포맷 변경
+
+    ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD HH24:MI:SS'; -- 원하는 날짜 형태로 포맷
+    ALTER SESSION SET TIME_ZONE = '09:00'; -- 다른 나라시간으로 조정해줌
+
+#### EXTRACT - 날짜 추출함수
+
+    SELECT EXTRACT(YEAR FROM SYSDATE) FROM DUAL;
+    SELECT EXTRACT(MONTH FROM SYSDATE) FROM DUAL;
+    SELECT EXTRACT(DAY FROM SYSDATE) FROM DUAL;
+    SELECT EXTRACT(HOUR FROM SYSTIMESTAMP) FROM DUAL; -- 시 분 초는 TIMESTAMP를 사용해야 한다.
+    SELECT EXTRACT(MINUTE FROM SYSTIMESTAMP) FROM DUAL;
+    SELECT EXTRACT(SECOND FROM SYSTIMESTAMP) FROM DUAL;
+
+    ex)회원가입을 2, 4, 11, 12월에 완료한 회원의 모든 정보를 출력;
+    SELECT * FROM MEMBER WHERE EXTRACT(MONTH FROM REGDATE) IN (2, 4, 11, 12);
+    
+#### ADD_MONTHS - 날짜를 누적하는 함수
+
+    SELECT ADD_MONTHS(SYSDATE, 1) FROM DUAL;
+    SELECT ADD_MONTHS(SYSDATE, -1) FROM DUAL;
+
+    ex) 가입 회원 중에 가입한지 6개월 안되는 회원을 조회하시오.;
+    SELECT * FROM MEMBER WHERE ADD_MONTHS(SYSDATE, -6) <= REGDATE; -- 현재에서 6개월을 뺀것보다 크면 만족
+
+
+
+#### MONTHS_BETWEEN - 날짜의 차이를 알아내는 함수
+
+    SELECT MONTHS_BETWEEN(SYSDATE, TO_DATE('2013-12-25')) FROM DUAL; --  TO_DATE 는 날짜로 변환해주는 함수
+    // 94.1200 -> 94개월이 조금 넘는다라는 뜻;
+    
+    -- ex) 가입 회원 중에 가입한지 6개월 안되는 회원을 조회하시오.
+    SELECT * FROM MEMBER WHERE MONTHS_BETWEEN(SYSDATE, REGDATE) < 6;
+
+#### NEXT_DAY - 다음 요일의 날짜를 알려주는 함수  NEXT_DAY
+
+    SELECT NEXT_DAY(SYSDATE, '화요일') FROM DUAL;
     
     
+#### LAST_DAY - 월의 마지막 일자를 알려주는 함수
+
+    SELECT LAST_DAY(SYSDATE) FROM DUAL;
+    SELECT LAST_DAY(TO_DATE('2021-01-24')) FROM DUAL;
+    // 2021-01-31 00:00:00;
+       
+### 11.4 형식 변환 함수
+
+![image](https://user-images.githubusercontent.com/81665608/139220404-fcc7f977-0512-4ec1-a263-a6f1e3878b1b.png)
+
+#### 숫자를 문자열로
     
-    
-    
-    
+![image](https://user-images.githubusercontent.com/81665608/139221115-47c20cfa-d0d2-45f6-bfec-8572a5d70cd9.png)
+
+    SELECT TO_CHAR(12345678, '99999,999') || 'HELLO' FROM DUAL;
+    //  12345,678HELLO;
+
+    SELECT TO_CHAR(1234567, '09,999,999,999') || '원' FROM DUAL; -- 0을 써주면 부족한 부분은 0으로 채움
+    //  00,001,234,567원;
+
+    SELECT TRIM(TO_CHAR(1234567, '9,999,999,999')) || '원' FROM DUAL; -- TRIM을 써서 공백제거 가능
+    // 1,234,567원;
+
+#### 날짜를 문자열로
+
+![image](https://user-images.githubusercontent.com/81665608/139222820-05654a9c-9551-4303-89ed-3ae5f7f5133e.png)
+
+    SELECT TO_CHAR(SYSDATE, 'YY/MM/DD HH24:MI') FROM DUAL;
+    // 21/10/28 17:58;
+
+#### 문자열을 날짜로
+
+![image](https://user-images.githubusercontent.com/81665608/139223422-3f39e5f0-1362-4246-9a98-dd51677ca649.png)
+
+    SELECT TO_DATE('2014-03-31', 'YYYY-MM-DD HH:MI:SS') FROM DUAL; -- 기본형태
+    // 2014-03-31 00:00:00
+    SELECT TO_DATE('2014-03-31 12:23:03', 'YYYY-MM-DD HH:MI:SS') FROM DUAL; -- 기본형태가 아닌건 포맷 문자를 이용해서 설명해야함
+    // 2014-03-31 12:23:03
+
+#### 문자열을 숫자로
+
+![image](https://user-images.githubusercontent.com/81665608/139223993-b34f9dc4-f708-4f34-9d19-db202ab1cfb7.png)
+
+    SELECT TO_NUMBER('2') + 3 FROM DUAL; -- 생략해도 되지만 명시적으로 입력
     
     
     
