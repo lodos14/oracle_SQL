@@ -523,11 +523,186 @@ WHERE 뒤에 ROWNUM은 새로운 SELECT의 ROWNUM 이므로 FROM의 ROWNUM에 �
 ![image](https://user-images.githubusercontent.com/81665608/139223993-b34f9dc4-f708-4f34-9d19-db202ab1cfb7.png)
 
     SELECT TO_NUMBER('2') + 3 FROM DUAL; -- 생략해도 되지만 명시적으로 입력
+
+### 11.5 NULL 함수
+
+#### NVL - NULL일 경우에 대체 값을 제공하는 함수;
+
+    SELECT NVL(AGE, 0) FROM MEMBER;
+
+    SELECT NVL(AGE, 0) +3 FROM MEMBER; -- AGE가 NULL인 경우 0으로 대체
+
+#### NVL2 - NVL에서 조건을 하나 더 확장한 함수
+
+    SELECT NVL2(AGE,10+3 ,0) FROM MEMBER; -- NULL인 경우 0, 아닌 경우 10+3
+
+#### NULLIF - 두 값이 같은 경우 NULL 그렇지 않은 경우 첫 번째 값 반환 함수;
+
+    SELECT NULLIF(AGE, 30) FROM MEMBER;
+
+#### DECODE - 조건에 따른 값 선택하기;
+
+    SELECT DECODE(GENDER, '남성', 1, 2) FROM MEMBER;
+    SELECT DECODE('011', '011', 'SK', '016', 'KT', '기타') FROM MEMBER; 
+    -- 첫 번째 인자가 011 이면 SK, 016 이면 KT 둘 다 아니면 기타 (인자는 여러개 넣을 수 있다.)
+    // SK; 
+
+### 11.6 집계 함수
+
+#### COUNT - 카운트 해줌
+
+    SELECT COUNT(ID) FROM NOTICE -> NOTICE에 ID가 몇개냐 (NULL은 제외하고 카운트함 
+    
+    // 그래서 레코드 수를 얻을려면 NULL인 안들어간 컬럼이나 * 을 사용
+    SELECT COUNT(*)FROM NOTICE -> 단점은 속도가 느릴 수 있으니 NULL이 안들어간 컬럼 사용 추천
+    
+#### SUM, AVG - 합이나 평균을 집계해줌
+
+    SELECT SUM(HIT) FROM NOTICE;
+    SELECT AVG(HIT) FROM NOTICE;
+    
+#### MIN,  MAX
+     
+## 12. SELECT 문의 구절
+
+SELECT, FROM ,WHERE, GROUP BY, HAVING, ORDER BY - 순서가 바뀌어서는 안된다.
+
+### 12.1 정렬하기 (ORDER BY)
+
+ASC : 오름차순<br>
+DESC : 내림차순
+
+옵션을 안쓰면 오름차순
+       
+    SELECT * FROM MEMBER ORDER BY NAME;
+    
+    EX)이름을 기준으로 역순으로 정렬해서 조회하시오.
+    SELECT * FROM MEMBER ORDER BY NAME DESC;
+    
+    EX)회원 중에서 박씨 성을 가진 회원을 조회하시오(오름차순)
+    SELECT * FROM MEMBER WHERE NAME LIKE '손%' ORDER BY NAME;
+    
+    // 이차 정렬할 경우
+    SELECT FROM NOTICE ORDER BY HIT DESC, REGDATE DESC;
+
+
+### 12.2 GROUP BY
+
+보통 집계함수랑 쓰이는데 작성자별, ID별 등 으로 집계해줌
+
+    SELECT COUNT(ID) FROM NOTICE GROUP BY WRITER_ID;
+    
+    SELECT WRITER_ID, COUNT(ID) FROM NOTICE GROUP BY WRITER_ID;
+    
+    // 주의할 점은 당연한거지만 그룹을 WRITER_ID로 했다면 SELECT에 WRITER_ID만 올 수 있다.
+    
+    // ORDER BY 까지 사용하면
+    SELECT WRITER_ID, COUNT(ID) COUNT FROM NOTICE GROUP BY WRITER_ID ORDER BY COUNT DESC;
+    
+    // 실행 순서는 FROM -> CONNECT BY -> WHERE -> GROUP BY -> HAVING -> SELECT -> ORDER BY 
+    그래서 FROM 절에 쓴 별칭은 전부 사용 가능하지만 SELECT에서 만든 별칭은 ORDER BY 절에서만 사용 가능
+
+### 12.3 HAVING
+
+집계 함수는 WHERE 절에서 사용할 수 없다. HAVING에서 사용
+
+    EX) 회원별 게시글 수를 조회하시오. 단 게시글이 2이하인 레코드만 출력하시오.    
+    SELECT WRITER_ID, COUNT(N.ID) FROM NOTICE N GROUP BY WRITER_ID HAVING COUNT(N.ID) <= 2;
+
+
+## 13. ROW_NUMBER(), RANK(), 
+
+ROWNUM은 WHERE절 쯤에 생성이 되므로 ORDER BY 를 하면 순서가 섞여서 출력된다.<br>
+그러므로 ORDER BY 후에 ROWNUM의 생성은 ROE_NUMBER를 이용한다.
+
+    SELECT  ROW_NUMBER() OVER (ORDER BY HIT), ID, TITLE, WRITER_ID, REGDATE, HIT
+    FROM NOTICE;
+    
+RANK는 정렬을 한 후에 순위를 매겨준다. 단 순위가 1 2 2 4 이런식으로 공동이 있으면 뒤에 순서는 밀린다.
+
+    SELECT  RANK() OVER (ORDER BY HIT), ID, TITLE, WRITER_ID, REGDATE, HIT
+    FROM NOTICE;
+    
+DENSE_RANK는 RANK의 순서가 밀리지 않게 출력한다. 1 2 2 3
+
+    SELECT  DENSE_RANK() OVER (ORDER BY HIT), ID, TITLE, WRITER_ID, REGDATE, HIT
+    FROM NOTICE;
+    
+전체가 아니라 작성자별, ID 별 등수를 매길 수 있는데
+
+    SELECT  DENSE_RANK() OVER (PARTITION BY WRITER_ID ORDER BY HIT), ID, TITLE, WRITER_ID, REGDATE, HIT
+    FROM NOTICE; -- 이 때 PARTITION BY 절에 들어가는 컬럼은 오름차순으로 정리된다.
+
+## 14. 부조회(서브쿼리)
+
+먼저 수행해서 그 결과를 남겨야 하는경우 서브쿼리를 사용한다.
+
+![image](https://user-images.githubusercontent.com/81665608/139427910-f735070b-7933-4ea1-b604-6358f2c1230c.png)
+
+    EX) 나이가 30 이상인 회원 목록을 조회하시오.
+    SELECT * FROM MEMBER WHERE AGE >= (SELECT AVG(AGE) FROM MEMBER);
+
+## 15. JOIN
+
+두개 이상의 테이블을 결합하여 데이터를 검색하는 방법이다.
+
+### 15.1 INNER JOIN
+
+참조키를 기준으로 일치하는 행만 조인 <br>
+일치하지 않는 행은 OUTER라 하고 빠짐
+
+![image](https://user-images.githubusercontent.com/81665608/139436880-5e359eb5-9916-46e0-b329-e76300f0d81e.png)
+
+    SELECT * FROM MEMBER INNER JOIN NOTICE ON MEMBER.ID = NOTICE.WRITER_ID;
+
+### 15.2 OUTER JOIN
+
+참조키를 기준으로 일치하지 않는 행도 포함시키는 조인
+ 
+MEMBER LEFT/RIGHT/FULL OUTER JOIN NOTICE ON MEMBER.ID = NOITCE.WRITER_ID 에서<br>
+
+- LEFT : 왼쪽의 OUTER를  포함시키겠다.
+- RIGHT : 오른쪽의 OUTER를 포함시키겠다.
+- FULL : 모두 포함시키겠다.
+
+    SELECT * FROM NOTICE FULL OUTER JOIN MEMBER ON NOTICE.WRITER_ID = MEMBER.ID;
+    // OUTER의 상대 테이블은 NULL 값으로 채워진다.
+    
+INNER를 쓸지 OUTER를 쓸지 잘 구분하자.
+
+### 15.3 내부 조인 연습
+
+#### 필드 이름의 충돌 문제
+
+![image](https://user-images.githubusercontent.com/81665608/139440555-0437d153-d893-4baf-8552-854288a44f53.png)
+
+별칭을 써서 식별자를 줄이자.
+
+    // ID, NAME 그리고 회원별 작성한 게시글 수를 조회하시오.
+    SELECT M.ID, M.NAME ,COUNT(N.ID) FROM MEMBER M LEFT JOIN NOTICE N ON M.ID = N.WRITER_ID GROUP BY M.ID, M.NAME;
+    // M.ID와 N.NAME를 기준으로 GROUP BY를 하면 M.ID, M.NAME의 컬럼을 불러올 수 있음
     
     
+### 15.4 SELF JOIN
+
+자신이 자신을 참조
+
+![image](https://user-images.githubusercontent.com/81665608/139446028-b308022d-9e1a-4946-bfd2-fabbcd20d007.png)
     
+![image](https://user-images.githubusercontent.com/81665608/139446247-c72b50e9-fe0c-43bb-a9e6-6c2e5a5d8252.png)
     
-    
-    
+    SELECT M.*, B.NAME BOSS FROM  MEMBER M LEFT OUTER JOIN MEMBER B ON B.ID = M.BOSS_ID;
+ 
+ ### 15.5 ORACLE JOIN
+ 
+ ![image](https://user-images.githubusercontent.com/81665608/139448181-7cee30b0-e828-46b0-93c2-515f315e2d48.png)
+ 
+ ![image](https://user-images.githubusercontent.com/81665608/139448294-0fbd6194-432f-489c-8a6b-3b340e915022.png)
+
+
+  
+  
+  
+  
     
     
