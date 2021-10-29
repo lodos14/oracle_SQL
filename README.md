@@ -639,7 +639,7 @@ DENSE_RANK는 RANK의 순서가 밀리지 않게 출력한다. 1 2 2 3
 
 ![image](https://user-images.githubusercontent.com/81665608/139427910-f735070b-7933-4ea1-b604-6358f2c1230c.png)
 
-    EX) 나이가 30 이상인 회원 목록을 조회하시오.
+    EX) 나이가 평균 이상인 회원 목록을 조회하시오.
     SELECT * FROM MEMBER WHERE AGE >= (SELECT AVG(AGE) FROM MEMBER);
 
 ## 15. JOIN
