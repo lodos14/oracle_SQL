@@ -551,7 +551,7 @@ WHERE 뒤에 ROWNUM은 새로운 SELECT의 ROWNUM 이므로 FROM의 ROWNUM에 �
 
 #### COUNT - 카운트 해줌
 
-    SELECT COUNT(ID) FROM NOTICE -> NOTICE에 ID가 몇개냐 (NULL은 제외하고 카운트함 
+    SELECT COUNT(ID) FROM NOTICE -> NOTICE에 ID가 몇개냐 (NULL은 제외하고 카운트함, 중복도 하나씩 다 셈) 
     
     // 그래서 레코드 수를 얻을려면 NULL인 안들어간 컬럼이나 * 을 사용
     SELECT COUNT(*)FROM NOTICE -> 단점은 속도가 느릴 수 있으니 NULL이 안들어간 컬럼 사용 추천
@@ -688,21 +688,104 @@ INNER를 쓸지 OUTER를 쓸지 잘 구분하자.
 자신이 자신을 참조
 
 ![image](https://user-images.githubusercontent.com/81665608/139446028-b308022d-9e1a-4946-bfd2-fabbcd20d007.png)
-    
+
 ![image](https://user-images.githubusercontent.com/81665608/139446247-c72b50e9-fe0c-43bb-a9e6-6c2e5a5d8252.png)
-    
+
     SELECT M.*, B.NAME BOSS FROM  MEMBER M LEFT OUTER JOIN MEMBER B ON B.ID = M.BOSS_ID;
- 
- ### 15.5 ORACLE JOIN
- 
- ![image](https://user-images.githubusercontent.com/81665608/139448181-7cee30b0-e828-46b0-93c2-515f315e2d48.png)
- 
- ![image](https://user-images.githubusercontent.com/81665608/139448294-0fbd6194-432f-489c-8a6b-3b340e915022.png)
+
+### 15.5 ORACLE JOIN
+
+![image](https://user-images.githubusercontent.com/81665608/139448181-7cee30b0-e828-46b0-93c2-515f315e2d48.png)
+
+![image](https://user-images.githubusercontent.com/81665608/139448294-0fbd6194-432f-489c-8a6b-3b340e915022.png)
 
 
-  
-  
-  
-  
+## 16. UNION
+
+레코드를 합치는 방법<br>
+유니온은 보통 중복을 허용하지 않음 중복된 내용의 다른 데이터는 날림 
+
+    SELECT ID, NAME FROM MEMBER
+    UNION
+    SELECT WRITER_ID, TITLE FROM NOTICE;
     
+    // 두가지 결과 집합에 대한 유니온도 가능하고 서브쿼리로 사용할 수 있음
+    SELECT NAME FROM (SELECT ID, NAME FROM MEMBER WHERE ID LIKE '%n%'
+    UNION
+    SELECT ID, NAME FROM MEMBER WHERE ID LIKE '%g%') WHERE NAME = '강호동';
+
+중복된 내용도 표시하려면 UNION ALL
+
+    SELECT ID, NAME FROM MEMBER
+    UNION ALL
+    SELECT WRITER_ID, TITLE FROM NOTICE;
     
+### 16.1 MINUS
+
+기준 데이터에서 다른 데이터에 있는 중복된 내용을 제거함
+
+    SELECT ID, NAME FROM MEMBER
+    MINUS
+    SELECT WRITER_ID, TITLE FROM NOTICE;
+
+### 16.2 INTERSECT 
+
+다른 데이터와 비교했을 때 공통인것만 나타냄
+
+    SELECT ID, NAME FROM MEMBER
+    INTERSECT
+    SELECT WRITER_ID, TITLE FROM NOTICE;
+
+## 17. view
+
+합친 테이블 데이터를 편리하게 정의해서 사용하는 방법
+
+![image](https://user-images.githubusercontent.com/81665608/139524410-1a4ca8e4-a370-4d61-8ed9-35d1380b5a2e.png)
+![image](https://user-images.githubusercontent.com/81665608/139524439-d1141065-744e-436b-987a-32513a14083d.png)
+
+    CREATE VIEW NOTICE_VIEW
+    AS
+    SELECT M.ID, M.NAME, N.TITLE FROM MEMBER M JOIN NOTICE N ON M.ID = N.WRITER_ID;
+    
+## 18. 제약조건
+
+### 18.1 도메인
+
+![image](https://user-images.githubusercontent.com/81665608/139525527-b4c03ece-323a-474f-abb3-2b760aea7356.png)
+
+#### 속성에 도메인이 아닌 값이 올 수 없도록 하는 제약조건
+
+- NOT NULL - 데이터 값의 결함이 있으면 안됨
+- DEFAULT - 사용자가 아니라 기본적으로 들어가야 하는 조건
+- CHECK - 도메인 범위를 체크     
+
+        // 테이블을 생성할 때 제약조건을 거는 경우
+        CREATE TABLE TEST
+        (
+            ID       VARCHAR2(50) NOT NULL,
+            EMAIL    VARCHAR2(200) NULL,
+            PHOME    CHAR(13) CHECK(PHONE LIKE '010-%-____') NOT NULL,
+            PWD      VARCHAR2(200) DEFAULT '111',
+            REGDATE  TIMESTAMP(6) DEFAULT SYSTIMESTAMP
+        )
+        
+        // 테이블을 생성 한 후에 제약조건을 거는 경우
+        ALTER TABLE TEST MODIFY EMAIL VARCHAR2(200) NOT NULL;
+        ALTER TABLE TEST MODIFY EMAIL VARCHAR2(200) DEFAULT '111';
+        ALTER TEST ADD CONSTRAINT CK_TEST_PHONE CHECK(PHONE LIKE '010-%-____');
+      
+
+    
+
+
+        
+
+
+### 18.2 엔티티
+
+### 18.3 릴레이션
+ 
+
+
+
+ 
