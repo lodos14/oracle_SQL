@@ -803,7 +803,7 @@ INNER를 쓸지 OUTER를 쓸지 잘 구분하자.
 - 시퀀스 -> 오른쪽 클릭 -> 새 시퀀스 ->  보통 캐시 20
 - 시퀀스를 만들고 테이블 편집 -> 컬럼 선택 -> ID열 탭 -> 열시퀀스 -> 시퀀스에서 시퀀스 고르기
 
-### 20. CASE WHEN 문
+## 20. CASE WHEN 문
 
     SELECT INS.ANIMAL_ID, INS.NAME,
     CASE WHEN REGEXP_LIKE(INS.SEX_UPON_INTAKE, 'Neutered|Spayed')
