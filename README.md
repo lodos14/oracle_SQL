@@ -774,17 +774,35 @@ INNER를 쓸지 OUTER를 쓸지 잘 구분하자.
         ALTER TABLE TEST MODIFY EMAIL VARCHAR2(200) DEFAULT '111';
         ALTER TEST ADD CONSTRAINT CK_TEST_PHONE CHECK(PHONE LIKE '010-%-____');
       
-
-    
-
-
-        
-
-
 ### 18.2 엔티티
+
+중복된 레코드가 없도록 제한한다.
+
+- Primary Key :  식별키라 불리며 중복을 허용하지 않는다. null도 불허용
+- Unique : 식별키는 아니지만 중복을 허용하지 않는다. null 
+
+        CREATE TABLE NOTICE
+        (
+            ID         NUMBER        PRIMARY KEY,   -- 기본키 제약 조건                                        
+            WRITER_ID  VARCHAR2(50)  NOT NULL UNIQUE  -- UNIQUE 제약 조건
+
+            CONSTRAINT NOTICE_ID_PK PRIMARY KEY(ID)    --이렇게 이름을 줄 수 있음
+            CONSTRAINT NOTICE_ID_UK UNIQUE(WRITER_ID)
+        )
+
+        ALTER TABLE NOTICE
+        ADD CONSTRAINT NOTICE_ID_PK PRIMARY KEY(ID);
+        ALTER TABLE NOTICE
+        CONSTRAINT NOTICE_ID_UK UNIQUE(WRITER_ID);
 
 ### 18.3 릴레이션
  
+## 19. 시퀀스
+
+- 일련번호를 만드는 것
+- 시퀀스 -> 오른쪽 클릭 -> 새 시퀀스 ->  보통 캐시 20
+- 시퀀스를 만들고 테이블 편집 -> 컬럼 선택 -> ID열 탭 -> 열시퀀스 -> 시퀀스에서 시퀀스 고르기
+
 
 
 
